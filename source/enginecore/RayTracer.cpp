@@ -347,7 +347,7 @@ void EngineCore::RayTracer::initRayTracedStorageImages() {
           .depth = 1,
       },
       1, 1, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, false, VK_SAMPLE_COUNT_1_BIT,
-      "Ray traced image");
+      "Ray traced Accum image");
 }
 
 void EngineCore::RayTracer::initBottomLevelAccelStruct(
@@ -658,4 +658,8 @@ void EngineCore::RayTracer::execute(VkCommandBuffer commandBuffer,
   if (frameId_ == std::numeric_limits<unsigned int>::max()) {
     frameId_ = 0;
   }
+
+  rayTracedImage_->transitionImageLayout(commandBuffer, VK_IMAGE_LAYOUT_GENERAL);
+  rayTracedaccumImage_->transitionImageLayout(commandBuffer, VK_IMAGE_LAYOUT_GENERAL);
+  envMap_->transitionImageLayout(commandBuffer, VK_IMAGE_LAYOUT_GENERAL);
 }

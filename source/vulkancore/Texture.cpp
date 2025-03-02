@@ -148,15 +148,15 @@ void Texture::uploadAndGenMips(VkCommandBuffer cmdBuffer, const Buffer* stagingB
 }
 
 void Texture::uploadOnly(VkCommandBuffer cmdBuffer, const Buffer* stagingBuffer,
-                         void* data, uint32_t layer) {
+                         void* data, uint32_t layer, int queueFamily) {
   context_.beginDebugUtilsLabel(cmdBuffer, "Uploading image", {1.0f, 0.0f, 0.0f, 1.0f});
 
   stagingBuffer->copyDataToBuffer(
       data, pixelSizeInBytes() * extents_.width * extents_.height * extents_.depth);
 
-  if (layout_ == VK_IMAGE_LAYOUT_UNDEFINED) {
-    transitionImageLayout(cmdBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-  }
+  //if (layout_ == VK_IMAGE_LAYOUT_UNDEFINED) {
+  transitionImageLayout(cmdBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, queueFamily);
+  //}
 
   const VkImageAspectFlags aspectMask =
       isDepth() ? isStencil() ? VK_IMAGE_ASPECT_STENCIL_BIT | VK_IMAGE_ASPECT_DEPTH_BIT
@@ -189,9 +189,7 @@ void Texture::addReleaseBarrier(VkCommandBuffer cmdBuffer, uint32_t srcQueueFami
   VkImageMemoryBarrier2 releaseBarrier = {
       .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
       .srcStageMask = VK_PIPELINE_STAGE_2_TRANSFER_BIT,
-      .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-      .dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
-      .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+      .srcAccessMask = VK_ACCESS_2_MEMORY_WRITE_BIT,
       .srcQueueFamilyIndex = srcQueueFamilyIndex,
       .dstQueueFamilyIndex = dstQueueFamilyIndex,
       .image = image_,
@@ -211,7 +209,8 @@ void Texture::addAcquireBarrier(VkCommandBuffer cmdBuffer, uint32_t srcQueueFami
                                 uint32_t dstQueueFamilyIndex) {
   VkImageMemoryBarrier2 acquireBarrier = {
       .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
-      .dstStageMask = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
+      .dstStageMask =
+          VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT,
       .dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT,
       .srcQueueFamilyIndex = srcQueueFamilyIndex,
       .dstQueueFamilyIndex = dstQueueFamilyIndex,
@@ -228,19 +227,22 @@ void Texture::addAcquireBarrier(VkCommandBuffer cmdBuffer, uint32_t srcQueueFami
   vkCmdPipelineBarrier2(cmdBuffer, &dependency_info);
 }
 
-void Texture::transitionImageLayout(VkCommandBuffer cmdBuffer, VkImageLayout newLayout) {
+void Texture::transitionImageLayout(VkCommandBuffer cmdBuffer, VkImageLayout newLayout,
+                                    int queueFamily) {
   VkAccessFlags srcAccessMask = VK_ACCESS_NONE;
   VkAccessFlags dstAccessMask = VK_ACCESS_NONE;
   VkPipelineStageFlags sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
   VkPipelineStageFlags destinationStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
 
-  constexpr VkPipelineStageFlags depthStageMask =
-      0 | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-      VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+  const VkPipelineStageFlags depthStageMask =
+      (queueFamily == 0) ?
+      (0 | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
+                            VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT)
+                         : VK_PIPELINE_STAGE_TRANSFER_BIT;
 
-  constexpr VkPipelineStageFlags sampledStageMask =
-      0 | VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
-      VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+  const VkPipelineStageFlags sampledStageMask = (queueFamily == 0) ?
+      (0 | VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT)
+          : VK_PIPELINE_STAGE_TRANSFER_BIT;
 
   /*std::cerr << "[transImgeLayot] Transitioning image " << debugName_ << " from
      "
@@ -493,31 +495,10 @@ void Texture::generateMips(VkCommandBuffer cmdBuffer) {
     mipHeight = newMipHeight;
   }
 
-  const VkImageMemoryBarrier finalBarrier = {
-      .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-      .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
-      .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
-      .oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-      .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-      .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-      .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-      .image = image_,
-      .subresourceRange =
-          {
-              .aspectMask = aspectMask,
-              .baseMipLevel = 0,
-              .levelCount = VK_REMAINING_MIP_LEVELS,
-              .baseArrayLayer = 0,
-              .layerCount = 1,
-          },
+  layout_ = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 
-  };
+  transitionImageLayout(cmdBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-  vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
-                       VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr,
-                       1, &finalBarrier);
-
-  layout_ = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
   context_.endDebugUtilsLabel(cmdBuffer);
 }
 

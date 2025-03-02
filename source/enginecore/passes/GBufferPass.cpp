@@ -170,7 +170,10 @@ void GBufferPass::render(
       .pClearValues = clearValues.data(),
   };
 
+  depthTexture_->transitionImageLayout(commandBuffer, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+
   context_->beginDebugUtilsLabel(commandBuffer, "GBuffer Pass", {0.0f, 1.0f, 0.0f, 1.0f});
+
 
   vkCmdBeginRenderPass(commandBuffer, &renderpassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
@@ -212,6 +215,7 @@ void GBufferPass::render(
                                 indirectDrawCountBuffer, 0, numMeshes, bufferSize);
 
   vkCmdEndRenderPass(commandBuffer);
+
   context_->endDebugUtilsLabel(commandBuffer);
   gBufferBaseColorTexture_->setImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
   gBufferNormalTexture_->setImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);

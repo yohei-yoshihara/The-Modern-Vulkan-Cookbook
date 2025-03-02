@@ -131,6 +131,8 @@ void ShadowPass::render(VkCommandBuffer commandBuffer, int frameIndex,
   context_->beginDebugUtilsLabel(commandBuffer, "ShadowMap Pass",
                                  {0.0f, 1.0f, 0.0f, 1.0f});
 
+  depthTexture_->transitionImageLayout(commandBuffer, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+
   vkCmdBeginRenderPass(commandBuffer, &renderpassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
   const VkViewport viewport = {
@@ -162,7 +164,7 @@ void ShadowPass::render(VkCommandBuffer commandBuffer, int frameIndex,
 
   vkCmdEndRenderPass(commandBuffer);
   context_->endDebugUtilsLabel(commandBuffer);
-  depthTexture_->setImageLayout(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+  depthTexture_->setImageLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 void ShadowPass::initTextures(VulkanCore::Context* context) {

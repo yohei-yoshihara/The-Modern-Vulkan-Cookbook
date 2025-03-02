@@ -49,8 +49,10 @@ class Texture final {
   void uploadAndGenMips(VkCommandBuffer cmdBuffer, const Buffer* stagingBuffer,
                         void* data);
 
-  void uploadOnly(VkCommandBuffer cmdBuffer, const Buffer* stagingBuffer,
-                  void* data, uint32_t layer = 0);
+  // queue family 0 = graphics queue, 1 = transfer queue
+  // ideally should specify bits that are set for this queue
+  void uploadOnly(VkCommandBuffer cmdBuffer, const Buffer* stagingBuffer, void* data,
+                  uint32_t layer = 0, int queueFamily = 0);
 
   void addReleaseBarrier(VkCommandBuffer cmdBuffer,
                          uint32_t srcQueueFamilyIndex,
@@ -60,8 +62,10 @@ class Texture final {
                          uint32_t srcQueueFamilyIndex,
                          uint32_t dstQueueFamilyIndex);
 
+  // queue family 0 = graphics queue, 1 = transfer queue
+  // ideally should specify bits that are set for this queue
   void transitionImageLayout(VkCommandBuffer cmdBuffer,
-                             VkImageLayout newLayout);
+                             VkImageLayout newLayout, int queueFamily = 0);
 
   bool isDepth() const;
 

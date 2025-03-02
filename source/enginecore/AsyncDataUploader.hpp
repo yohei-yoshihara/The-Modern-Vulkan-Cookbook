@@ -98,14 +98,15 @@ class AsyncDataUploader {
     int index;
   };
 
-  void startProcessing();
+  void startLoadingTexturesToGPU();
+
+  void processLoadedTextures(VulkanCore::CommandQueueManager& graphicsCommandQueueMgr);
 
   void queueTextureUploadTasks(const TextureLoadTask& textureLoadTask);
 
  private:
   VulkanCore::Context& context_;
   VulkanCore::CommandQueueManager transferCommandQueueMgr_;
-  VulkanCore::CommandQueueManager graphicsCommandQueueMgr_;
 
   SharedQueue<TextureLoadTask> textureLoadTasks_;
   SharedQueue<TextureMipGenTask> textureMipGenerationTasks_;
@@ -114,6 +115,7 @@ class AsyncDataUploader {
   std::thread textureGPUDataUploadThread_;
   std::thread textureMipGenThread_;
   bool closeThreads_ = false;
-  std::vector<VkSemaphore> semaphores_;
+  std::mutex textureLoadTasksMutex_;
+  std::mutex mipGenMutex_;
 };
 }  // namespace EngineCore

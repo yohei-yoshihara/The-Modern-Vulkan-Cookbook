@@ -116,14 +116,16 @@ void PhysicalDevice::reserveQueues(VkQueueFlags requestedQueueTypes,
                                            &supportsPresent);
       if (supportsPresent == VK_TRUE) {
         presentationFamilyIndex_ = queueFamilyIndex;
-        presentationQueueCount_ = queueFamilyProperties_[queueFamilyIndex].queueCount;
+        presentationQueueCount_ = 1;
+        //queueFamilyProperties_[queueFamilyIndex].queueCount;
       }
     }
     if (!graphicsFamilyIndex_.has_value() &&
         (requestedQueueTypes & queueFamilyProperties_[queueFamilyIndex].queueFlags) &
             VK_QUEUE_GRAPHICS_BIT) {
       graphicsFamilyIndex_ = queueFamilyIndex;
-      graphicsQueueCount_ = queueFamilyProperties_[queueFamilyIndex].queueCount;
+      graphicsQueueCount_ = 1;
+      //queueFamilyProperties_[queueFamilyIndex].queueCount;
       requestedQueueTypes &= ~VK_QUEUE_GRAPHICS_BIT;
       continue;
     }
@@ -132,7 +134,8 @@ void PhysicalDevice::reserveQueues(VkQueueFlags requestedQueueTypes,
         (requestedQueueTypes & queueFamilyProperties_[queueFamilyIndex].queueFlags) &
             VK_QUEUE_COMPUTE_BIT) {
       computeFamilyIndex_ = queueFamilyIndex;
-      computeQueueCount_ = queueFamilyProperties_[queueFamilyIndex].queueCount;
+      computeQueueCount_ = 1;
+      //queueFamilyProperties_[queueFamilyIndex].queueCount;
       requestedQueueTypes &= ~VK_QUEUE_COMPUTE_BIT;
       continue;
     }
@@ -141,7 +144,8 @@ void PhysicalDevice::reserveQueues(VkQueueFlags requestedQueueTypes,
         (requestedQueueTypes & queueFamilyProperties_[queueFamilyIndex].queueFlags) &
             VK_QUEUE_TRANSFER_BIT) {
       transferFamilyIndex_ = queueFamilyIndex;
-      transferQueueCount_ = queueFamilyProperties_[queueFamilyIndex].queueCount;
+      transferQueueCount_ = 1;
+      //queueFamilyProperties_[queueFamilyIndex].queueCount;
       requestedQueueTypes &= ~VK_QUEUE_TRANSFER_BIT;
       continue;
     }
@@ -150,7 +154,8 @@ void PhysicalDevice::reserveQueues(VkQueueFlags requestedQueueTypes,
         (requestedQueueTypes & queueFamilyProperties_[queueFamilyIndex].queueFlags) &
             VK_QUEUE_SPARSE_BINDING_BIT) {
       sparseFamilyIndex_ = queueFamilyIndex;
-      sparseQueueCount_ = queueFamilyProperties_[queueFamilyIndex].queueCount;
+      sparseQueueCount_ = 1;
+      //queueFamilyProperties_[queueFamilyIndex].queueCount;
       requestedQueueTypes &= ~VK_QUEUE_SPARSE_BINDING_BIT;
       continue;
     }

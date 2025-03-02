@@ -213,6 +213,8 @@ int main(int argc, char* argv[]) {
     vkCmdClearDepthStencilImage(commandBuffer, depthTexture->vkImage(),
                                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearDepth, 1,
                                 &range);
+
+    depthTexture->transitionImageLayout(commandBuffer, VK_IMAGE_LAYOUT_GENERAL);
     commandMgr.endCmdBuffer(commandBuffer);
 
     VkPipelineStageFlags flags = VK_PIPELINE_STAGE_TRANSFER_BIT;

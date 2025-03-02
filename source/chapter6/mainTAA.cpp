@@ -208,10 +208,10 @@ int main(int argc, char* argv[]) {
       EngineCore::GLBLoader glbLoader;
       bistro =
           glbLoader.load("resources/assets/Bistro.glb", pool, glbTextureDataLoadedCB);
+      textures.resize(bistro->textures.size(), emptyTexture);
       TracyVkZone(tracyCtx_, commandBuffer, "Model upload");
       EngineCore::convertModel2OneBuffer(context, commandMgr, commandBuffer,
                                          *bistro.get(), buffers, samplers);
-      textures.resize(bistro->textures.size(), emptyTexture);
       numMeshes = bistro->meshes.size();
     }
 
@@ -264,7 +264,7 @@ int main(int argc, char* argv[]) {
   TracyPlotConfig("Swapchain image index", tracy::PlotFormatType::Number, true, false,
                   tracy::Color::Aqua);
 
-  dataUploader.startProcessing();
+  dataUploader.startLoadingTexturesToGPU();
   pool.unpause();
 
   glm::mat4 prevViewMat = camera.viewMatrix();
@@ -278,6 +278,8 @@ int main(int argc, char* argv[]) {
       previousFrameIndex = frameIndex;
       time = now;
     }
+
+    dataUploader.processLoadedTextures(commandMgr);
 
     if (frameIndex == std::numeric_limits<uint32_t>::max()) {
       frameIndex = 0;
