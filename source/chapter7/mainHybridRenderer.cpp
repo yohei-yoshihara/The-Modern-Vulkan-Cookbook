@@ -310,8 +310,6 @@ int main(int argc, char* argv[]) {
       time = now;
     }
 
-    dataUploader.processLoadedTextures(commandMgr);
-
     if (camera.isDirty()) {
       transform.view = camera.viewMatrix();
       camera.setNotDirty();
@@ -325,12 +323,16 @@ int main(int argc, char* argv[]) {
     lightCamBuffer.buffer()->copyDataToBuffer(&lightCamTransform,
                                               sizeof(UniformTransforms));
 
-    commandMgr.waitUntilSubmitIsComplete();
+
+    auto commandBuffer = commandMgr.getCmdBufferToBegin();
+
+
+    dataUploader.processLoadedTextures(commandBuffer, commandMgr.queueFamilyIndex());
+
     const auto texture = context.swapchain()->acquireImage();
     const auto index = context.swapchain()->currentImageIndex();
     TracyPlot("Swapchain image index", (int64_t)index);
 
-    auto commandBuffer = commandMgr.getCmdBufferToBegin();
 
     cullingPass.cull(commandBuffer, index);
     cullingPass.addBarrierForCulledBuffers(

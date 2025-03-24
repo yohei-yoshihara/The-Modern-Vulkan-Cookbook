@@ -177,10 +177,10 @@ int main(int argc, char* argv[]) {
       time = now;
     }
 
+    auto commandBuffer = commandMgr.getCmdBufferToBegin();
+
     const auto texture = context.swapchain()->acquireImage();
     const auto index = context.swapchain()->currentImageIndex();
-
-    auto commandBuffer = commandMgr.getCmdBufferToBegin();
 
     static Technique imgui_currentTechnique = RayTracerRadiance;
 

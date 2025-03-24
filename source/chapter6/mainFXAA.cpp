@@ -387,13 +387,13 @@ int main(int argc, char* argv[]) {
       time = now;
     }
 
-    dataUploader.processLoadedTextures(commandMgr);
+    auto commandBuffer = commandMgr.getCmdBufferToBegin();
+
+    dataUploader.processLoadedTextures(commandBuffer, commandMgr.queueFamilyIndex());
 
     const auto texture = context.swapchain()->acquireImage();
     const auto index = context.swapchain()->currentImageIndex();
     TracyPlot("Swapchain image index", (int64_t)index);
-
-    auto commandBuffer = commandMgr.getCmdBufferToBegin();
 
     const VkRenderPassBeginInfo renderpassInfo = {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,

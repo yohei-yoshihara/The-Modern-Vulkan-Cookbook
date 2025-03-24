@@ -155,6 +155,8 @@ int main(int argc, char** argv) {
   while (!glfwWindowShouldClose(window_)) {
     fps.update(glfwGetTime());
 
+    auto commandBuffer = commandMgr.getCmdBufferToBegin();
+
     const auto texture = context.swapchain()->acquireImage();
     const auto swapchainImageIndex = context.swapchain()->currentImageIndex();
 
@@ -164,8 +166,6 @@ int main(int argc, char** argv) {
       swapchain_framebuffers[swapchainImageIndex] = context.createFramebuffer(
           renderPass->vkRenderPass(), {texture}, nullptr, nullptr);
     }
-
-    auto commandBuffer = commandMgr.getCmdBufferToBegin();
 
     // Begin Render Pass
     constexpr VkClearValue clearColor{0.0f, 0.0f, 0.0f, 0.0f};

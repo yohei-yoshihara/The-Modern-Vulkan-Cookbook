@@ -71,8 +71,8 @@ void AsyncDataUploader::startLoadingTexturesToGPU() {
 
 }
 
-void AsyncDataUploader::processLoadedTextures(
-    VulkanCore::CommandQueueManager& graphicsCommandQueueMgr) {
+void AsyncDataUploader::processLoadedTextures(VkCommandBuffer commandBuffer,
+                                              uint32_t queueFamilyIndex) {
 
     if (textureMipGenerationTasks_.size() > 0) {
         mipGenMutex_.lock();
@@ -81,25 +81,12 @@ void AsyncDataUploader::processLoadedTextures(
         textureMipGenerationTasks_.pop_front();
         mipGenMutex_.unlock();
 
-        auto commandBuffer = graphicsCommandQueueMgr.getCmdBufferToBegin();
         task.texture->addAcquireBarrier(commandBuffer,
-                                        transferCommandQueueMgr_.queueFamilyIndex(),
-                                        graphicsCommandQueueMgr.queueFamilyIndex());
+                                        transferCommandQueueMgr_.queueFamilyIndex(), queueFamilyIndex);
         { 
             
             task.texture->generateMips(commandBuffer); 
         }
-
-
-        graphicsCommandQueueMgr.endCmdBuffer(commandBuffer);
-        VkPipelineStageFlags flags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        auto submitInfo =
-            context_.swapchain()->createSubmitInfo(&commandBuffer, &flags, false, false);
-        submitInfo.pWaitSemaphores = &task.graphicsSemaphore;
-        submitInfo.waitSemaphoreCount = 1;
-        graphicsCommandQueueMgr.submit(&submitInfo);
-
-        graphicsCommandQueueMgr.waitUntilSubmitIsComplete();
 
         vkDestroySemaphore(context_.device(), task.graphicsSemaphore, nullptr);
 

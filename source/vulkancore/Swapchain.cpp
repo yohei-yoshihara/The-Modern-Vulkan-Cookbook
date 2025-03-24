@@ -68,7 +68,9 @@ Swapchain::~Swapchain() {
   VK_CHECK(vkWaitForFences(device_, 1, &acquireFence_, VK_TRUE, UINT64_MAX));
   vkDestroyFence(device_, acquireFence_, nullptr);
   vkDestroySemaphore(device_, imageRendered_, nullptr);
-  vkDestroySemaphore(device_, imageAvailable_, nullptr);
+  for (auto s : imagesAvailable_) {
+    vkDestroySemaphore(device_, s, nullptr);
+  }
   vkDestroySwapchainKHR(device_, swapchain_, nullptr);
 }
 
@@ -78,8 +80,10 @@ std::shared_ptr<Texture> Swapchain::acquireImage() {
   VK_CHECK(vkWaitForFences(device_, 1, &acquireFence_, VK_TRUE, UINT64_MAX));
   VK_CHECK(vkResetFences(device_, 1, &acquireFence_));
 
-  VK_CHECK(vkAcquireNextImageKHR(device_, swapchain_, UINT64_MAX, imageAvailable_,
+  VK_CHECK(vkAcquireNextImageKHR(device_, swapchain_, UINT64_MAX,
+                                 imagesAvailable_[imageAvailableSemaphoreIndex_],
                                  acquireFence_, &imageIndex_));
+
   return images_[imageIndex_];
 }
 
@@ -89,14 +93,24 @@ VkSubmitInfo Swapchain::createSubmitInfo(const VkCommandBuffer* buffer,
                                          bool signalImagePresented) const {
   const VkSubmitInfo si = {
       .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-      .waitSemaphoreCount = waitForImageAvailable ? (imageAvailable_ ? 1u : 0) : 0,
-      .pWaitSemaphores = waitForImageAvailable ? &imageAvailable_ : VK_NULL_HANDLE,
+      .waitSemaphoreCount =
+          waitForImageAvailable
+              ? (imagesAvailable_[imageAvailableSemaphoreIndex_] ? 1u : 0)
+              : 0,
+      .pWaitSemaphores = waitForImageAvailable
+                             ? &imagesAvailable_[imageAvailableSemaphoreIndex_]
+                             : VK_NULL_HANDLE,
       .pWaitDstStageMask = submitStageMask,
       .commandBufferCount = 1,
       .pCommandBuffers = buffer,
       .signalSemaphoreCount = signalImagePresented ? (imageRendered_ ? 1u : 0) : 0,
       .pSignalSemaphores = signalImagePresented ? &imageRendered_ : VK_NULL_HANDLE,
   };
+
+  if (waitForImageAvailable) {
+    imageAvailableSemaphoreIndex_ = (imageAvailableSemaphoreIndex_ + 1) % numberImages();
+  }
+
   return si;
 }
 
@@ -121,6 +135,7 @@ void Swapchain::createTextures(const Context& context, VkFormat imageFormat,
   VK_CHECK(vkGetSwapchainImagesKHR(device_, swapchain_, &imageCount, images.data()));
 
   images_.reserve(imageCount);
+  imagesAvailable_.resize(imageCount);
   for (size_t index = 0; index < imageCount; ++index) {
     images_.emplace_back(
         std::make_shared<Texture>(context, device_, images[index], imageFormat,
@@ -138,9 +153,12 @@ void Swapchain::createSemaphores(const Context& context) {
   const VkSemaphoreCreateInfo semaphoreInfo{
       .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
   };
-  VK_CHECK(vkCreateSemaphore(device_, &semaphoreInfo, nullptr, &imageAvailable_));
-  context.setVkObjectname(imageAvailable_, VK_OBJECT_TYPE_SEMAPHORE,
-                          "Semaphore: swapchain image available semaphore");
+
+  for (size_t i = 0; i < imagesAvailable_.size(); ++i) {
+    VK_CHECK(vkCreateSemaphore(device_, &semaphoreInfo, nullptr, &imagesAvailable_[i]));
+    context.setVkObjectname(imagesAvailable_[i], VK_OBJECT_TYPE_SEMAPHORE,
+        "Semaphore: swapchain image available semaphore " + std::to_string(i));
+  }
 
   VK_CHECK(vkCreateSemaphore(device_, &semaphoreInfo, nullptr, &imageRendered_));
   context.setVkObjectname(imageRendered_, VK_OBJECT_TYPE_SEMAPHORE,

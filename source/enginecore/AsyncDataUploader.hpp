@@ -100,7 +100,7 @@ class AsyncDataUploader {
 
   void startLoadingTexturesToGPU();
 
-  void processLoadedTextures(VulkanCore::CommandQueueManager& graphicsCommandQueueMgr);
+  void processLoadedTextures(VkCommandBuffer commandBuffer, uint32_t queueFamilyIndex);
 
   void queueTextureUploadTasks(const TextureLoadTask& textureLoadTask);
 

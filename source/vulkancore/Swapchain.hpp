@@ -61,9 +61,10 @@ class Swapchain final {
   VkSwapchainKHR swapchain_ = VK_NULL_HANDLE;
   VkQueue presentQueue_ = VK_NULL_HANDLE;
   std::vector<std::shared_ptr<Texture>> images_;
-  VkSemaphore imageAvailable_ = VK_NULL_HANDLE;
+  std::vector <VkSemaphore> imagesAvailable_;
   VkSemaphore imageRendered_ = VK_NULL_HANDLE;
   uint32_t imageIndex_ = 0;
+  mutable uint32_t imageAvailableSemaphoreIndex_ = 0;
   VkExtent2D extent_;
   VkFormat imageFormat_;
   VkFence acquireFence_ = VK_NULL_HANDLE;

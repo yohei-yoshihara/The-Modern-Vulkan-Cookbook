@@ -341,6 +341,8 @@ int main(int argc, char* argv[]) {
       time = now;
     }
 
+    auto commandBuffer = commandMgr.getCmdBufferToBegin();
+
     const auto texture = context.swapchain()->acquireImage();
     const auto index = context.swapchain()->currentImageIndex();
     TracyPlot("Swapchain image index", (int64_t)index);
@@ -366,7 +368,6 @@ int main(int argc, char* argv[]) {
         .clearValue = clearValues[1],
     };
 
-    auto commandBuffer = commandMgr.getCmdBufferToBegin();
 
     VulkanCore::DynamicRendering::beginRenderingCmd(commandBuffer, texture->vkImage(), 0,
                                                     {{0, 0},

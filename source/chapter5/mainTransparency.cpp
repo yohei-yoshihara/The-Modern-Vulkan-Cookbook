@@ -381,6 +381,8 @@ int main(int argc, char* argv[]) {
   while (!glfwWindowShouldClose(window_)) {
     fps.update(glfwGetTime());
 
+    auto commandBuffer = commandMgr.getCmdBufferToBegin();
+
     const auto texture = context.swapchain()->acquireImage();
     const auto index = context.swapchain()->currentImageIndex();
     TracyPlot("Swapchain image index", (int64_t)index);
@@ -399,7 +401,6 @@ int main(int argc, char* argv[]) {
     static std::vector<std::array<float, 4>> imgui_meshColors(numMeshes,
                                                               {0.0f, 0.0f, 0.0f, 0.0f});
 
-    auto commandBuffer = commandMgr.getCmdBufferToBegin();
 
     static int imgui_meshIndex = 0;
 

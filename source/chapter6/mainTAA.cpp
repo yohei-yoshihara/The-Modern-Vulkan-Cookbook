@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 
   std::vector<std::string> validationLayers;
 #ifdef _DEBUG
-  validationLayers.push_back("VK_LAYER_KHRONOS_validation");
+  //validationLayers.push_back("VK_LAYER_KHRONOS_validation");
 #endif
 
   VulkanCore::Context::enableDefaultFeatures();
@@ -279,8 +279,6 @@ int main(int argc, char* argv[]) {
       time = now;
     }
 
-    dataUploader.processLoadedTextures(commandMgr);
-
     if (frameIndex == std::numeric_limits<uint32_t>::max()) {
       frameIndex = 0;
       previousFrameIndex = 0;
@@ -306,12 +304,14 @@ int main(int argc, char* argv[]) {
 
     prevViewMat = camera.viewMatrix();
 
-    commandMgr.waitUntilSubmitIsComplete();
+    auto commandBuffer = commandMgr.getCmdBufferToBegin();
+
+    dataUploader.processLoadedTextures(commandBuffer, commandMgr.queueFamilyIndex());
+
+
     const auto texture = context.swapchain()->acquireImage();
     const auto index = context.swapchain()->currentImageIndex();
     TracyPlot("Swapchain image index", (int64_t)index);
-
-    auto commandBuffer = commandMgr.getCmdBufferToBegin();
 
     cullingPass.cull(commandBuffer, index);
     cullingPass.addBarrierForCulledBuffers(

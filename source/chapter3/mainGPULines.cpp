@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
 
   std::vector<std::string> validationLayers;
 #ifdef _DEBUG
-  validationLayers.push_back("VK_LAYER_KHRONOS_validation");
+  //validationLayers.push_back("VK_LAYER_KHRONOS_validation");
 #endif
 
   VulkanCore::Context::enableDefaultFeatures();
@@ -427,10 +427,11 @@ int main(int argc, char* argv[]) {
   while (!glfwWindowShouldClose(window_)) {
     fps.update(glfwGetTime());
 
+    auto commandBuffer = commandMgr.getCmdBufferToBegin();
+
     const auto texture = context.swapchain()->acquireImage();
     const auto index = context.swapchain()->currentImageIndex();
 
-    auto commandBuffer = commandMgr.getCmdBufferToBegin();
 
     const VkRenderPassBeginInfo renderpassInfoMain = {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
