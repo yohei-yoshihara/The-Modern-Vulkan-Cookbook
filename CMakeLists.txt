@@ -221,6 +221,17 @@ else()
 	FetchContent_MakeAvailable(glm gli imgui stb tracy gltfsdk meshopt dlss volk "${GLSLANG_LIB}")
 endif()
 
+# added for glsl -> spir-v
+set(BUILD_SHARED_LIBS OFF)
+set(ENABLE_OPT OFF)
+FetchContent_Declare(
+  glslang
+  GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
+  GIT_TAG vulkan-sdk-1.4.309.0
+)
+FetchContent_MakeAvailable(glslang)
+include_directories(${glslang_SOURCE_DIR})
+
 include_directories(${stb_SOURCE_DIR})
 include_directories(${volk_SOURCE_DIR})
 include_directories(${glm_SOURCE_DIR})
@@ -240,32 +251,34 @@ include_directories(${freetype_SOURCE_DIR}/include)
 include_directories(${font-demo_SOURCE_DIR})
 include_directories(${dlss_SOURCE_DIR}/include/)
 
-set(RequiredVulkanSDKLIBS 
-    debug OSDependentd optimized OSDependent
-    debug MachineIndependentd optimized MachineIndependent
-    debug GenericCodeGend optimized GenericCodeGen
-    debug glslangd optimized glslang
-    debug SPIRVd optimized SPIRV
-    debug SPIRV-Toolsd optimized SPIRV-Tools
-    debug SPIRV-Tools-optd optimized SPIRV-Tools-opt
-    debug glslang-default-resource-limitsd optimized glslang-default-resource-limits
-    debug spirv-cross-cored optimized spirv-cross-core
-    debug spirv-cross-glsld optimized spirv-cross-glsl
-    debug spirv-cross-reflectd optimized spirv-cross-reflect)
-if (GLSLANG_LIB)
-  set(RequiredVulkanSDKLIBS 
-      debug OSDependentd optimized OSDependent
-      debug MachineIndependentd optimized MachineIndependent
-      debug GenericCodeGend optimized GenericCodeGen
-      debug glslangd optimized glslang
-      debug SPIRVd optimized SPIRV
-      debug SPIRV-Toolsd optimized SPIRV-Tools
-      debug SPIRV-Tools-optd optimized SPIRV-Tools-opt
-      debug glslang-default-resource-limitsd optimized glslang-default-resource-limits
-      debug spirv-cross-cored optimized spirv-cross-core
-      debug spirv-cross-glsld optimized spirv-cross-glsl
-      debug spirv-cross-reflectd optimized spirv-cross-reflect)
-endif()
+#set(RequiredVulkanSDKLIBS 
+#    debug OSDependentd optimized OSDependent
+#    debug MachineIndependentd optimized MachineIndependent
+#    debug GenericCodeGend optimized GenericCodeGen
+#    debug glslangd optimized glslang
+#    debug SPIRVd optimized SPIRV
+#    debug SPIRV-Toolsd optimized SPIRV-Tools
+#    debug SPIRV-Tools-optd optimized SPIRV-Tools-opt
+#    debug glslang-default-resource-limitsd optimized glslang-default-resource-limits
+#    debug spirv-cross-cored optimized spirv-cross-core
+#    debug spirv-cross-glsld optimized spirv-cross-glsl
+#    debug spirv-cross-reflectd optimized spirv-cross-reflect)
+#if (GLSLANG_LIB)
+#  set(RequiredVulkanSDKLIBS 
+#      debug OSDependentd optimized OSDependent
+#      debug MachineIndependentd optimized MachineIndependent
+#      debug GenericCodeGend optimized GenericCodeGen
+#      debug glslangd optimized glslang
+#      debug SPIRVd optimized SPIRV
+#      debug SPIRV-Toolsd optimized SPIRV-Tools
+#      debug SPIRV-Tools-optd optimized SPIRV-Tools-opt
+#      debug glslang-default-resource-limitsd optimized glslang-default-resource-limits
+#      debug spirv-cross-cored optimized spirv-cross-core
+#      debug spirv-cross-glsld optimized spirv-cross-glsl
+#      debug spirv-cross-reflectd optimized spirv-cross-reflect)
+#endif()
+
+set(RequiredVulkanSDKLIBS glslang spirv-reflect-static glslang-default-resource-limits)
 
 add_subdirectory(source/vulkancore)
 add_subdirectory(source/enginecore)
