@@ -43,3 +43,5 @@ source/chapter8/.idea
 /source/chapter4/resources/shaders/IndirectCommon.glsl
 /source/chapter4/resources/shaders/CommonStructs.glsl
 /source/chapter4/resources/shaders/BufferDeviceAddress.glsl
+build/
+out/

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <unordered_set>
@@ -25,8 +26,8 @@ uint32_t fnv_hash(const void* key, int len);
 
 std::vector<char> readFile(const std::string& filePath, bool isBinary = false);
 
-void writeFile(const std::string& filePath,
-               const std::vector<char>& fileContents, bool isBinary = false);
+void writeFile(const std::string& filePath, const std::vector<char>& fileContents,
+               bool isBinary = false);
 
 int endsWith(const char* s, const char* part);
 

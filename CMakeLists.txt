@@ -39,7 +39,7 @@ link_directories(${Vulkan_INCLUDE_DIR}/../lib)
 
 FetchContent_Declare(spirvreflect
     GIT_REPOSITORY https://github.com/KhronosGroup/SPIRV-Reflect.git
-    GIT_TAG sdk-1.3.236.0)
+    GIT_TAG vulkan-sdk-1.4.309)
 
 if(NOT spirvreflect_POPULATED)
   set(SPIRV_REFLECT_EXECUTABLE OFF CACHE BOOL "SPIRV_REFLECT_EXE" FORCE)
@@ -54,14 +54,14 @@ FetchContent_MakeAvailable(spirvreflect)
 FetchContent_Declare(
         volk
         GIT_REPOSITORY https://github.com/zeux/volk.git
-        GIT_TAG 1.3.270
+        GIT_TAG vulkan-sdk-1.4.309.0
 )
 FetchContent_MakeAvailable(volk)
 
 FetchContent_Declare(
         vma
         GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
-        GIT_TAG v3.0.1
+        GIT_TAG v3.2.1
 )
 FetchContent_MakeAvailable(vma)
 include_directories(${vma_SOURCE_DIR}/include)
@@ -69,7 +69,7 @@ include_directories(${vma_SOURCE_DIR}/include)
 FetchContent_Declare(
     glm
     GIT_REPOSITORY https://github.com/g-truc/glm.git
-    GIT_TAG 0.9.9.8
+    GIT_TAG 1.0.1
 )
 
 set(GLI_TEST_ENABLE OFF CACHE INTERNAL "")
@@ -141,7 +141,7 @@ FetchContent_Populate(threadpool)
 FetchContent_Declare(
     freetype
     GIT_REPOSITORY https://github.com/freetype/freetype.git
-    GIT_TAG        VER-2-13-0
+    GIT_TAG        VER-2-13-3
 )
 FetchContent_GetProperties(freetype)
 if(NOT freetype_POPULATED)
@@ -174,8 +174,8 @@ endif()
 
 FetchContent_Declare(
   gltfsdk
-  GIT_REPOSITORY https://github.com/microsoft/glTF-SDK.git
-  GIT_TAG        r1.9.6.0
+  GIT_REPOSITORY https://github.com/yohei-yoshihara/glTF-SDK.git
+  GIT_TAG        b3eb4e36dee860264889a0ffd0684a9946473dfb
 )
 if(NOT gltfsdk_POPULATED)
   set(ENABLE_UNIT_TESTS OFF CACHE BOOL "" FORCE)
@@ -191,7 +191,7 @@ add_subdirectory(${gltfsdk_SOURCE_DIR})
 FetchContent_Declare(
   meshopt
   GIT_REPOSITORY https://github.com/zeux/meshoptimizer.git
-  GIT_TAG v0.18
+  GIT_TAG v0.23
 )
 if(NOT meshopt_POPULATED)
   FetchContent_Populate(meshopt)

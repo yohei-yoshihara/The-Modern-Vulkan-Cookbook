@@ -1,6 +1,7 @@
 #include "Buffer.hpp"
 
 #include <algorithm>
+#include <cstring>
 #include <iostream>
 
 #include "Context.hpp"
@@ -91,7 +92,7 @@ void Buffer::copyDataToBuffer(const void* data, size_t size) const {
   if (!mappedMemory_) {
     VK_CHECK(vmaMapMemory(allocator_, allocation_, &mappedMemory_));
   }
-  memcpy(mappedMemory_, data, size);
+  std::memcpy(mappedMemory_, data, size);
 }
 
 VkDeviceAddress Buffer::vkDeviceAddress() const {

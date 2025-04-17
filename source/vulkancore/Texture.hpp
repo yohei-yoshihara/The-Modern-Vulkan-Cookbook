@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <unordered_map>
 
 #include "Common.hpp"
@@ -17,9 +18,8 @@ class Texture final {
 
   explicit Texture(const Context& context, VkImageType type, VkFormat format,
                    VkImageCreateFlags flags, VkImageUsageFlags usageFlags,
-                   VkExtent3D extents, uint32_t numMipLevels,
-                   uint32_t layerCount, VkMemoryPropertyFlags memoryFlags,
-                   bool generateMips = false,
+                   VkExtent3D extents, uint32_t numMipLevels, uint32_t layerCount,
+                   VkMemoryPropertyFlags memoryFlags, bool generateMips = false,
                    VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT,
                    const std::string& name = "", bool multiview = false,
                    VkImageTiling = VK_IMAGE_TILING_OPTIMAL);
@@ -54,18 +54,16 @@ class Texture final {
   void uploadOnly(VkCommandBuffer cmdBuffer, const Buffer* stagingBuffer, void* data,
                   uint32_t layer = 0, int queueFamily = 0);
 
-  void addReleaseBarrier(VkCommandBuffer cmdBuffer,
-                         uint32_t srcQueueFamilyIndex,
+  void addReleaseBarrier(VkCommandBuffer cmdBuffer, uint32_t srcQueueFamilyIndex,
                          uint32_t dstQueueFamilyIndex);
 
-  void addAcquireBarrier(VkCommandBuffer cmdBuffer,
-                         uint32_t srcQueueFamilyIndex,
+  void addAcquireBarrier(VkCommandBuffer cmdBuffer, uint32_t srcQueueFamilyIndex,
                          uint32_t dstQueueFamilyIndex);
 
   // queue family 0 = graphics queue, 1 = transfer queue
   // ideally should specify bits that are set for this queue
-  void transitionImageLayout(VkCommandBuffer cmdBuffer,
-                             VkImageLayout newLayout, int queueFamily = 0);
+  void transitionImageLayout(VkCommandBuffer cmdBuffer, VkImageLayout newLayout,
+                             int queueFamily = 0);
 
   bool isDepth() const;
 
@@ -85,8 +83,8 @@ class Texture final {
   uint32_t getMipLevelsCount(uint32_t texWidth, uint32_t texHeight) const;
 
   VkImageView createImageView(const Context& context, VkImageViewType viewType,
-                              VkFormat format, uint32_t numMipLevels,
-                              uint32_t layers, const std::string& name = "");
+                              VkFormat format, uint32_t numMipLevels, uint32_t layers,
+                              const std::string& name = "");
 
  private:
   const Context& context_;

@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <csignal>
 #include <fstream>
 #include <functional>
 #include <map>
@@ -26,7 +27,7 @@ VkBool32 VKAPI_PTR debugMessengerCallback(
 #if defined(_WIN32)
     __debugbreak();
 #else
-    raise(SIGTRAP);
+    std::raise(SIGTRAP);
 #endif
   } else if (messageSeverity & (~VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)) {
     LOGW("debugMessengerCallback : MessageCode is %s & Message is %s",
@@ -169,13 +170,13 @@ Context::Context(void* window, const std::vector<std::string>& requestedLayers,
 #endif
 
     const VkValidationFeaturesEXT features = {
-      .sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT,
+        .sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT,
 #if defined(VK_EXT_layer_settings)
-      .pNext = DEBUG_SHADER_PRINTF_CALLBACK ? &layer_settings_create_info : nullptr,
+        .pNext = DEBUG_SHADER_PRINTF_CALLBACK ? &layer_settings_create_info : nullptr,
 #endif
-      .enabledValidationFeatureCount =
-          static_cast<uint32_t>(validationFeaturesEnabled.size()),
-      .pEnabledValidationFeatures = validationFeaturesEnabled.data(),
+        .enabledValidationFeatureCount =
+            static_cast<uint32_t>(validationFeaturesEnabled.size()),
+        .pEnabledValidationFeatures = validationFeaturesEnabled.data(),
     };
 
     const VkInstanceCreateInfo instanceInfo = {
@@ -196,21 +197,21 @@ Context::Context(void* window, const std::vector<std::string>& requestedLayers,
 #if defined(VK_EXT_debug_utils)
   if (enabledInstanceExtensions_.contains(VK_EXT_DEBUG_UTILS_EXTENSION_NAME)) {
     const VkDebugUtilsMessengerCreateInfoEXT messengerInfo = {
-      .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-      .flags = 0,
-      .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-                         VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
-                         VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                         VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-      .messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-                     VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-                     VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT
+        .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
+        .flags = 0,
+        .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+                           VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
+                           VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                           VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
+        .messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                       VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                       VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT
 #if defined(VK_EXT_device_address_binding_report)
-                     | VK_DEBUG_UTILS_MESSAGE_TYPE_DEVICE_ADDRESS_BINDING_BIT_EXT
+                       | VK_DEBUG_UTILS_MESSAGE_TYPE_DEVICE_ADDRESS_BINDING_BIT_EXT
 #endif
-      ,
-      .pfnUserCallback = &debugMessengerCallback,
-      .pUserData = nullptr,
+        ,
+        .pfnUserCallback = &debugMessengerCallback,
+        .pUserData = nullptr,
     };
     VK_CHECK(
         vkCreateDebugUtilsMessengerEXT(instance_, &messengerInfo, nullptr, &messenger_));
@@ -419,20 +420,20 @@ Context::Context(const VkApplicationInfo& appInfo,
 #if defined(VK_EXT_debug_utils)
   if (enabledInstanceExtensions_.contains(VK_EXT_DEBUG_UTILS_EXTENSION_NAME)) {
     const VkDebugUtilsMessengerCreateInfoEXT messengerInfo = {
-      .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-      .flags = 0,
-      .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-                         VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
-                         VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                         VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-      .messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-                     VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
+        .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
+        .flags = 0,
+        .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+                           VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
+                           VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                           VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
+        .messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                       VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
 #if defined(VK_EXT_device_address_binding_report)
-                     | VK_DEBUG_UTILS_MESSAGE_TYPE_DEVICE_ADDRESS_BINDING_BIT_EXT
+                       | VK_DEBUG_UTILS_MESSAGE_TYPE_DEVICE_ADDRESS_BINDING_BIT_EXT
 #endif
-      ,
-      .pfnUserCallback = &debugMessengerCallback,
-      .pUserData = nullptr,
+        ,
+        .pfnUserCallback = &debugMessengerCallback,
+        .pUserData = nullptr,
     };
     VK_CHECK(
         vkCreateDebugUtilsMessengerEXT(instance_, &messengerInfo, nullptr, &messenger_));
@@ -912,47 +913,47 @@ void Context::endDebugUtilsLabel(VkCommandBuffer commandBuffer) const {
 
 void Context::createMemoryAllocator() {
   const VmaVulkanFunctions vulkanFunctions = {
-    .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
-    .vkGetDeviceProcAddr = vkGetDeviceProcAddr,
-    .vkGetPhysicalDeviceProperties = vkGetPhysicalDeviceProperties,
-    .vkGetPhysicalDeviceMemoryProperties = vkGetPhysicalDeviceMemoryProperties,
-    .vkAllocateMemory = vkAllocateMemory,
-    .vkFreeMemory = vkFreeMemory,
-    .vkMapMemory = vkMapMemory,
-    .vkUnmapMemory = vkUnmapMemory,
-    .vkFlushMappedMemoryRanges = vkFlushMappedMemoryRanges,
-    .vkInvalidateMappedMemoryRanges = vkInvalidateMappedMemoryRanges,
-    .vkBindBufferMemory = vkBindBufferMemory,
-    .vkBindImageMemory = vkBindImageMemory,
-    .vkGetBufferMemoryRequirements = vkGetBufferMemoryRequirements,
-    .vkGetImageMemoryRequirements = vkGetImageMemoryRequirements,
-    .vkCreateBuffer = vkCreateBuffer,
-    .vkDestroyBuffer = vkDestroyBuffer,
-    .vkCreateImage = vkCreateImage,
-    .vkDestroyImage = vkDestroyImage,
-    .vkCmdCopyBuffer = vkCmdCopyBuffer,
+      .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
+      .vkGetDeviceProcAddr = vkGetDeviceProcAddr,
+      .vkGetPhysicalDeviceProperties = vkGetPhysicalDeviceProperties,
+      .vkGetPhysicalDeviceMemoryProperties = vkGetPhysicalDeviceMemoryProperties,
+      .vkAllocateMemory = vkAllocateMemory,
+      .vkFreeMemory = vkFreeMemory,
+      .vkMapMemory = vkMapMemory,
+      .vkUnmapMemory = vkUnmapMemory,
+      .vkFlushMappedMemoryRanges = vkFlushMappedMemoryRanges,
+      .vkInvalidateMappedMemoryRanges = vkInvalidateMappedMemoryRanges,
+      .vkBindBufferMemory = vkBindBufferMemory,
+      .vkBindImageMemory = vkBindImageMemory,
+      .vkGetBufferMemoryRequirements = vkGetBufferMemoryRequirements,
+      .vkGetImageMemoryRequirements = vkGetImageMemoryRequirements,
+      .vkCreateBuffer = vkCreateBuffer,
+      .vkDestroyBuffer = vkDestroyBuffer,
+      .vkCreateImage = vkCreateImage,
+      .vkDestroyImage = vkDestroyImage,
+      .vkCmdCopyBuffer = vkCmdCopyBuffer,
 #if VMA_VULKAN_VERSION >= 1001000
-    .vkGetBufferMemoryRequirements2KHR = vkGetBufferMemoryRequirements2,
-    .vkGetImageMemoryRequirements2KHR = vkGetImageMemoryRequirements2,
-    .vkBindBufferMemory2KHR = vkBindBufferMemory2,
-    .vkBindImageMemory2KHR = vkBindImageMemory2,
-    .vkGetPhysicalDeviceMemoryProperties2KHR = vkGetPhysicalDeviceMemoryProperties2,
+      .vkGetBufferMemoryRequirements2KHR = vkGetBufferMemoryRequirements2,
+      .vkGetImageMemoryRequirements2KHR = vkGetImageMemoryRequirements2,
+      .vkBindBufferMemory2KHR = vkBindBufferMemory2,
+      .vkBindImageMemory2KHR = vkBindImageMemory2,
+      .vkGetPhysicalDeviceMemoryProperties2KHR = vkGetPhysicalDeviceMemoryProperties2,
 #endif
 #if VMA_VULKAN_VERSION >= 1003000
-    .vkGetDeviceBufferMemoryRequirements = vkGetDeviceBufferMemoryRequirements,
-    .vkGetDeviceImageMemoryRequirements = vkGetDeviceImageMemoryRequirements,
+      .vkGetDeviceBufferMemoryRequirements = vkGetDeviceBufferMemoryRequirements,
+      .vkGetDeviceImageMemoryRequirements = vkGetDeviceImageMemoryRequirements,
 #endif
   };
 
   const VmaAllocatorCreateInfo allocInfo = {
 #if defined(VK_KHR_buffer_device_address) && defined(_WIN32)
-    .flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT,
+      .flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT,
 #endif
-    .physicalDevice = physicalDevice_.vkPhysicalDevice(),
-    .device = device_,
-    .pVulkanFunctions = &vulkanFunctions,
-    .instance = instance_,
-    .vulkanApiVersion = applicationInfo_.apiVersion,
+      .physicalDevice = physicalDevice_.vkPhysicalDevice(),
+      .device = device_,
+      .pVulkanFunctions = &vulkanFunctions,
+      .instance = instance_,
+      .vulkanApiVersion = applicationInfo_.apiVersion,
   };
   vmaCreateAllocator(&allocInfo, &allocator_);
 }

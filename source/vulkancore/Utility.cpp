@@ -1,6 +1,7 @@
 #include "Utility.hpp"
 
 #include <algorithm>
+#include <cstdint>
 #include <cstring>
 #include <fstream>
 
@@ -18,8 +19,8 @@ uint32_t fnv_hash(const void* key, int len) {
   return h;
 }
 
-void writeFile(const std::string& filePath,
-               const std::vector<char>& fileContents, bool isBinary) {
+void writeFile(const std::string& filePath, const std::vector<char>& fileContents,
+               bool isBinary) {
   if (isBinary) {
     std::ofstream out(filePath, std::ios::app | std::ios::binary);
     out.write(fileContents.data(), fileContents.size());
